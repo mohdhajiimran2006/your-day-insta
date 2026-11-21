@@ -1,0 +1,18 @@
+{
+  "name": "your-day-diary",
+  "version": "2.0.0",
+  "description": "A serverless social media diary app powered by Firebase (Auth, Firestore, WebRTC). No server required.",
+  "scripts": {
+    "start": "npx serve public",
+    "deploy": "firebase deploy"
+  },
+  "keywords": [
+    "firebase",
+    "social-media",
+    "diary",
+    "webrtc",
+    "firestore"
+  ],
+  "author": "",
+  "license": "ISC"
+}

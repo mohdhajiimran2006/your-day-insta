@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Users: public read so search, profiles, and login by username work
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update, write: if isSignedIn();
+      allow delete: if false;
+    }
+
+    // Posts (Feed Posts, Reels & 24h Stories): public read; signed-in users can create/update/delete
+    match /posts/{postId} {
+      allow read: if true;
+      allow create, update, write: if isSignedIn();
+      allow delete: if isSignedIn();
+      match /{subcollection=**} {
+        allow read: if true;
+        allow write: if isSignedIn();
+      }
+    }
+
+    // Stories: 24h stories uploads (photos & videos)
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create, update, write, delete: if isSignedIn();
+      match /{subcollection=**} {
+        allow read: if true;
+        allow write: if isSignedIn();
+      }
+    }
+
+    // Reels: short videos & reels feed
+    match /reels/{reelId} {
+      allow read: if true;
+      allow create, update, write, delete: if isSignedIn();
+      match /{subcollection=**} {
+        allow read: if true;
+        allow write: if isSignedIn();
+      }
+    }
+
+    // Cloud Video Chunks (for Reels & Story videos up to 125MB)
+    match /videoChunks/{chunkId} {
+      allow read: if true;
+      allow create, update, write, delete: if isSignedIn();
+    }
+
+    // Bookmarks / Saved posts
+    match /bookmarks/{bookmarkId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Likes & Video Chunks
+    match /likes/{likeId} {
+      allow read: if true;
+      allow create, update, delete, write: if isSignedIn();
+    }
+
+    // Comments
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create, update, delete, write: if isSignedIn();
+    }
+
+    // Follows
+    match /follows/{followId} {
+      allow read: if true;
+      allow create, update, delete, write: if isSignedIn();
+    }
+
+    // Blocks
+    match /blocks/{blockId} {
+      allow read: if true;
+      allow create, update, delete, write: if isSignedIn();
+    }
+
+    // Direct Messages (supports Delete for Everyone & Delete for Me)
+    match /messages/{messageId} {
+      allow read, create, update, delete, write: if isSignedIn();
+    }
+
+    // Groups & Group Messages
+    match /groups/{groupId} {
+      allow read, create, update, delete, write: if isSignedIn();
+    }
+    match /groupMessages/{messageId} {
+      allow read, create, update, delete, write: if isSignedIn();
+    }
+
+    // WebRTC Calls signaling
+    match /calls/{callId} {
+      allow read, write: if isSignedIn();
+      match /{subcollection=**} {
+        allow read, write: if isSignedIn();
+      }
+    }
+
+    // Fallback rule for any new collections or subcollections
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+  }
+}
